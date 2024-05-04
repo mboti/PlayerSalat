@@ -61,6 +61,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.exoplayer.ExoPlayer
 import com.mboti.playersalat.Commun.convertToText
+import com.mboti.playersalat.Preferences.MySharedPreferences
 import com.mboti.playersalat.model.Music
 import com.mboti.playersalat.model.playList
 import com.mboti.playersalat.ui.theme.PlayerSalatTheme
@@ -84,6 +85,10 @@ TODO Ajouter dans le manifeste.xml les deux lignes afin de
 
 
 lateinit var player: ExoPlayer
+
+val strElFatiha = "ٱلْفَاتِحَةِ"
+val strAyat = "آيات"
+val strOther = "آحرون"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -268,24 +273,32 @@ private fun InitProcessus(playList: List<Music>) {
         }
 
 
+        // Récupérer les valeurs des SharedPréférences
+        val myPref = MySharedPreferences(context)
+        val valElFatiha = myPref.getSoundElFatiha(myPref.sharedSoundElFatiha, 60)
+        val valAyat = myPref.getSoundAyat(myPref.sharedSoundAyat, 90)
+        val valOthers = myPref.getSoundOther(myPref.sharedSoundOther, 10)
+
+        val valCountdown = myPref.getCountdown(myPref.sharedSoundCountdown, true)
+        val valBeeps = myPref.getBeeps(myPref.sharedSoundBeeps, false)
+        val valSpeed = myPref.getSpeed(myPref.sharedSoundSpeed, 1.0F)
+
+
 
         Column (Modifier.fillMaxSize()){
             Row (Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween)
             {
-                VerticalSliderSound("ٱلْفَاتِحَةِ","Fatiha")
-                VerticalSliderSound("آيات","Ayat")
-                VerticalSliderSound("آحرون","Others")
+                VerticalSliderSound(strElFatiha,"El-Fatiha",valElFatiha, myPref )
+                VerticalSliderSound(strAyat,"Ayat", valAyat, myPref)
+                VerticalSliderSound(strOther,"Others", valOthers, myPref)
             }
             Spacer(modifier = Modifier.width(10.dp))
-            SwitchCountdown()
+            SwitchCountdown(valCountdown, myPref)
             Spacer(modifier = Modifier.width(10.dp))
-            SwitchBeep()
-            SliderSpeed()
+            SwitchBeep(valBeeps, myPref)
+            SliderSpeed(valSpeed, myPref)
         }
-
-
-
 
 
         TrackSliderPlayer(
@@ -301,13 +314,15 @@ private fun InitProcessus(playList: List<Music>) {
             currentPosition,
             totalDuration,
         )
-
     }
 }
 
+
+
+
 @Composable
-fun SwitchCountdown() {
-    val switchCountdownState = remember { mutableStateOf(false) }
+fun SwitchCountdown(valCountdown: Boolean, myPref: MySharedPreferences) {
+    val switchCountdownState = remember { mutableStateOf(valCountdown) }
 
     Row(
         Modifier
@@ -321,6 +336,7 @@ fun SwitchCountdown() {
             checked = switchCountdownState.value,
             onCheckedChange = { isChecked ->
                 switchCountdownState.value = isChecked
+                myPref.saveCountdown(myPref.sharedSoundCountdown, isChecked)
             }
         )
     }
@@ -328,8 +344,8 @@ fun SwitchCountdown() {
 
 
 @Composable
-fun SwitchBeep() {
-    val switchBeepState = remember { mutableStateOf(false) }
+fun SwitchBeep(valBeeps: Boolean, myPref: MySharedPreferences) {
+    val switchBeepState = remember { mutableStateOf(valBeeps) }
 
     Row(
         Modifier
@@ -343,6 +359,7 @@ fun SwitchBeep() {
             checked = switchBeepState.value,
             onCheckedChange = { isChecked ->
                 switchBeepState.value = isChecked
+                myPref.saveBeeps(myPref.sharedSoundBeeps, isChecked)
             }
         )
     }
@@ -420,12 +437,12 @@ fun TrackSliderPlayer(
 
 
 @Composable
-fun VerticalSliderSound(titleArabic:String, title:String){
+fun VerticalSliderSound(titleArabic:String, title:String, sliderValue:Int, myPref:MySharedPreferences){
 
     val steps = 100 // Number of steps in the SeekBar
     val divided = steps.toFloat()
 
-    var sliderProgressValue by rememberSaveable { mutableIntStateOf(70) }
+    var sliderProgressValue by rememberSaveable { mutableIntStateOf(sliderValue) }
     Box {
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -439,7 +456,12 @@ fun VerticalSliderSound(titleArabic:String, title:String){
                         progressValue = sliderProgressValue
                     ) {
                         sliderProgressValue = it
-
+                        //MAJ des sharedPreferences
+                        when (titleArabic) {
+                            strElFatiha ->  myPref.saveSoundElFatiha(myPref.sharedSoundElFatiha, it)
+                            strAyat ->   myPref.saveSoundAyat(myPref.sharedSoundAyat, it)
+                            else ->   myPref.saveSoundOther(myPref.sharedSoundOther, it)
+                        }
                         player.volume = (sliderProgressValue/divided)
                     }
                 }
@@ -461,8 +483,8 @@ fun VerticalSliderSound(titleArabic:String, title:String){
 
             Spacer(modifier = Modifier.padding(5.dp))
             //Text("$sliderProgressValue", textAlign = TextAlign.Center, fontSize = 50.sp)
-            Text(titleArabic, textAlign = TextAlign.Center, fontSize = 22.sp)
-            Text(title, textAlign = TextAlign.Center, fontSize = 13.sp)
+            Text(titleArabic, textAlign = TextAlign.Center, fontSize = 23.sp)
+            Text(title, textAlign = TextAlign.Center, fontSize = 11.sp)
         }
     }
 }
@@ -470,8 +492,8 @@ fun VerticalSliderSound(titleArabic:String, title:String){
 
 
 @Composable
-fun SliderSpeed() {
-    var sliderSpeedPosition by remember { mutableFloatStateOf(1f) }
+fun SliderSpeed(valSpeed: Float, myPref: MySharedPreferences) {
+    var sliderSpeedPosition by remember { mutableFloatStateOf(valSpeed) }
     Row(
         Modifier
             .fillMaxWidth()
@@ -486,6 +508,7 @@ fun SliderSpeed() {
                 value = sliderSpeedPosition,
                 onValueChange = {
                     sliderSpeedPosition = arroundValue(it)
+                    myPref.saveSpeed(myPref.sharedSoundSpeed, sliderSpeedPosition)
                     val playbackParameters = PlaybackParameters(sliderSpeedPosition) // 1.5x speed
                     player.playbackParameters = playbackParameters
                 },
@@ -505,46 +528,3 @@ fun SliderSpeed() {
 private fun arroundValue(v:Float):Float{
     return (v * 10.0).roundToInt() / 10.0F
 }
-
-
-//    @OptIn(ExperimentalMaterial3Api::class)
-//    @Composable
-//    fun ExposedDropdownMenuSample() {
-//        val options = listOf("2", "1.75", "1.5", "1.25" , "1", "0.75", "0.5")
-//        var expanded by remember { mutableStateOf(false) }
-//        var selectedOptionText by remember { mutableStateOf(options[4]) }
-//        // We want to react on tap/press on TextField to show menu
-//        ExposedDropdownMenuBox(
-//            expanded = expanded,
-//            onExpandedChange = { expanded = it },
-//            modifier = Modifier.widthIn(max = 150.dp)
-//        ) {
-//            TextField(
-//                // The `menuAnchor` modifier must be passed to the text field for correctness.
-//                modifier = Modifier.menuAnchor(),
-//                readOnly = true,
-//                value = selectedOptionText,
-//                onValueChange = {},
-//                label = { Text("Speed") },
-//                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-//                colors = ExposedDropdownMenuDefaults.textFieldColors(),
-//            )
-//            ExposedDropdownMenu(
-//                expanded = expanded,
-//                onDismissRequest = { expanded = false },
-//            ) {
-//                options.forEach { selectionOption ->
-//                    DropdownMenuItem(
-//                        text = { Text(selectionOption) },
-//                        onClick = {
-//                            selectedOptionText = selectionOption
-//                            expanded = false
-//                        },
-//                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-//                    )
-//                }
-//            }
-//        }
-//    }
-
-
