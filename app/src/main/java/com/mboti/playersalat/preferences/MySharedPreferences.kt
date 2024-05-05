@@ -1,4 +1,4 @@
-package com.mboti.playersalat.Preferences
+package com.mboti.playersalat.preferences
 
 import android.content.Context
 

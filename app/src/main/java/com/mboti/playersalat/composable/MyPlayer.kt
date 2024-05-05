@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
-import com.mboti.playersalat.Commun.convertToText
+import com.mboti.playersalat.commun.convertToText
 import com.mboti.playersalat.R
 import com.mboti.playersalat.model.Music
 import com.mboti.playersalat.player

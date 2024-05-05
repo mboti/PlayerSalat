@@ -46,7 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.PlaybackParameters
-import com.mboti.playersalat.Preferences.MySharedPreferences
+import com.mboti.playersalat.preferences.MySharedPreferences
 import com.mboti.playersalat.R
 import com.mboti.playersalat.player
 import kotlin.math.roundToInt
