@@ -4,22 +4,14 @@ import android.content.Context
 
 class MySharedPreferences (context: Context) {
 
-    private val sharedPreferences = context.getSharedPreferences("my_preferences", Context.MODE_PRIVATE)
-
-    fun saveString(key: String, value: String) {
-        sharedPreferences.edit().putString(key, value).apply()
-    }
-
-    fun getString(key: String, defaultValue: String): String? {
-        return sharedPreferences.getString(key, defaultValue)
-    }
-
     val sharedSoundElFatiha = "sharedSoundElFatiha"
     val sharedSoundAyat = "sharedSoundAyat"
     val sharedSoundOther = "sharedSoundOther"
     val sharedSoundCountdown = "sharedSoundCountdown"
     val sharedSoundBeeps = "sharedSoundBeeps"
     val sharedSoundSpeed = "sharedSoundSpeed"
+
+    private val sharedPreferences = context.getSharedPreferences("my_preferences", Context.MODE_PRIVATE)
 
 
     // Sound El-Fatiha

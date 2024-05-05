@@ -1,4 +1,4 @@
-package com.mboti.playersalat
+package com.mboti.playersalat.composable
 
 import android.view.MotionEvent
 import androidx.compose.foundation.Canvas
