@@ -1,12 +1,8 @@
 package com.mboti.playersalat.composable
 
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +34,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.cos
@@ -45,32 +42,19 @@ import kotlin.math.sin
 
 
 val showDialog =   mutableStateOf(false)
-
-@Composable
-fun LaunchCountdown(){
-    if(showDialog.value){
-        DialogCountdown(setShowDialog = { showDialog.value = it }) {
-            Log.i("HomePage","HomePage : $it")
-        }
-    }
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Button(onClick = { showDialog.value = true }) {
-            Text(text = "Open Dialog")
-        }
-    }
-}
+val isCountdownFinish =   mutableStateOf(false)
+val isReactiveCountdown =   mutableStateOf(true)
 
 
 
 @Composable
 fun DialogCountdown(setShowDialog: (Boolean) -> Unit, setValue: (String) -> Unit) {
 
-    Dialog(onDismissRequest = { setShowDialog(false) }) {
+    Dialog(
+        onDismissRequest = { setShowDialog(false) },
+        // ne pas fermer le décompte si je clique en dehors de la boite de Dialog
+        properties = DialogProperties(dismissOnBackPress = false,dismissOnClickOutside = false)
+    ) {
         Surface(
             shape = RoundedCornerShape(16.dp),
         ) {
@@ -116,6 +100,7 @@ fun DialogCountdown(setShowDialog: (Boolean) -> Unit, setValue: (String) -> Unit
                         value = currentTime / totalTime.toFloat()
 
                         if(currentTime == 0L){
+                            isCountdownFinish.value = true
                             setShowDialog(false)
                             setValue("PLAY")
                         }
@@ -215,11 +200,13 @@ fun DialogCountdown(setShowDialog: (Boolean) -> Unit, setValue: (String) -> Unit
                             if(currentTime <= 0L) {
                                 currentTime = totalTime
                                 isTimerRunning = true
-                                println("Mounir1-----------> $currentTime")
-                            } else {
-                                isTimerRunning = !isTimerRunning
-                                println("Mounir2-----------> $isTimerRunning")
                             }
+                            /**je désactive le click sur le bouton "RESUME"**/
+                            /*
+                            else {
+                                isTimerRunning = !isTimerRunning
+                            }
+                             */
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
 

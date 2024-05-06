@@ -1,6 +1,7 @@
 package com.mboti.playersalat.composable
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,8 +44,7 @@ import com.mboti.playersalat.R
 import com.mboti.playersalat.model.Music
 import com.mboti.playersalat.player
 import kotlinx.coroutines.delay
-
-
+import kotlinx.coroutines.launch
 
 
 /*--------------------------------------------------------
@@ -66,7 +67,9 @@ class Player{
     }
     @Composable
     fun InitPlayer(myList: List<Music>) {
+
         val playingSongIndex = remember { mutableIntStateOf(0) }
+        val coroutineScopeManagePlayAndPause = rememberCoroutineScope()
 
         // currentMediaItemIndex : Returns the index of the current MediaItem in the timeline,
         // or the prospective index if the current timeline is empty.
@@ -130,18 +133,22 @@ class Player{
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
+                InitCountdown() // dépend de 'showDialog'
+
                 Button(
                     onClick = {
                         isPlaying.value = false
                         player.setPlayWhenReady(false);
                         player.stop();
-                        player.seekTo(0);
+                        player.seekTo(0)
+                        player.seekToDefaultPosition(0)
+                        isReactiveCountdown.value = true
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary,
-                        //contentColor = Color.White
                     ),
-                    enabled = player.isPlaying
+                    enabled = !isReactiveCountdown.value
+                    //enabled = player.isPlaying
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_stop),
@@ -163,19 +170,37 @@ class Player{
                     checked = isPlaying.value,
                     onCheckedChange = {
                         isPlaying.value = it
-                        //TODO ---------------------------c'est ici qu'il faudra agir pour activer le player
+
+                        /*
                         if (isPlaying.value) {
                             player.play()
                         } else {
                             player.pause()
                         }
+                         */
 
+                        coroutineScopeManagePlayAndPause.launch {
+                            if(isReactiveCountdown.value)
+                                showDialog.value = true
+
+                            if (isPlaying.value) {
+                                player.play()
+//                                if(isReactiveCountdown.value){
+//                                    delay(3300)
+//                                    player.play()
+//                                }
+                                isReactiveCountdown.value = false
+                            }else{
+                                player.pause()
+                            }
+                        }
                     },
                     colors = IconButtonDefaults.filledTonalIconToggleButtonColors(if (isPlaying.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary),
                     modifier = Modifier.size(80.dp),
                 )
                 {
-                    if (isPlaying.value) {
+
+                    if (isPlaying.value && isCountdownFinish.value) {
                         //Icon(Icons.Filled.Lock, contentDescription = "Localized description", modifier = Modifier.size(50.dp))
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_pause),
@@ -189,6 +214,8 @@ class Player{
                             modifier = Modifier.size(60.dp)
                         )
                     }
+
+
                 }
 
 
@@ -286,5 +313,18 @@ class Player{
             )
         }
     }
+
+
+    @Composable
+    fun InitCountdown(){
+        if(showDialog.value){
+            DialogCountdown(
+                setShowDialog = { showDialog.value = it }
+            ) {
+                Log.i("HomePage","HomePage : $it")
+            }
+        }
+    }
 }
+
 
