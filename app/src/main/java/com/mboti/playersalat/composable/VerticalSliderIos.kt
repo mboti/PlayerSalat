@@ -29,19 +29,19 @@ private const val MAX_VALUE = 100
 private const val MIN_VALUE = 0
 
 /**
- * Creates a [ComposeVerticalSliderState] that is remembered across compositions.
+ * Creates a [VerticalSliderIos] that is remembered across compositions.
  */
 @Composable
-fun rememberComposeVerticalSliderState(): ComposeVerticalSliderState {
+fun rememberComposeVerticalSliderState(): VerticalSliderIos {
     return remember {
-        ComposeVerticalSliderState()
+        VerticalSliderIos()
     }
 }
 
 /**
- * [ComposeVerticalSliderState] maintains the state of [ComposeVerticalSlider].
+ * [VerticalSliderIos] maintains the state of [ComposeVerticalSlider].
  */
-class ComposeVerticalSliderState {
+class VerticalSliderIos {
 
     var isEnabled = mutableStateOf(true)
         internal set
@@ -116,7 +116,7 @@ class ComposeVerticalSliderState {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ComposeVerticalSlider(
-    state: ComposeVerticalSliderState,
+    state: VerticalSliderIos,
     progressValue: Int? = null,
     enabled: Boolean = true,
     width: Dp = 140.dp,

@@ -9,7 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.media3.exoplayer.ExoPlayer
-import com.mboti.playersalat.composable.MyPlayer
+import com.mboti.playersalat.composable.Player
 import com.mboti.playersalat.model.playList
 import com.mboti.playersalat.ui.theme.PlayerSalatTheme
 
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MyPlayer().InitPlayer(playList)
+                    Player().InitPlayer(playList)
                 }
             }
         }

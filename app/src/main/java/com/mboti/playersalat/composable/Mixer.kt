@@ -58,7 +58,7 @@ const val strOther = "آحرون"
 
 
 @Composable
-fun SettingsMixer() {
+fun OpenMixer() {
     var showModal by remember { mutableStateOf(false) }
 
     Column {
@@ -90,7 +90,7 @@ fun SettingsMixer() {
 
 
         if (showModal) {
-            MyBottomSheet(
+            BottomSheetMixer(
                 onDismissRequest = { /* Ne rien faire ici pour empêcher la fermeture */ },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -101,7 +101,7 @@ fun SettingsMixer() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyBottomSheet(
+fun BottomSheetMixer(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {

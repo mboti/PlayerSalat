@@ -60,7 +60,7 @@ TODO Ajouter dans le manifeste.xml les deux lignes afin de
     implementation ("androidx.media3:media3-exoplayer:1.3.1")
  --------------------------------------------------------*/
 
-class MyPlayer{
+class Player{
 
     init {
     }
@@ -118,7 +118,7 @@ class MyPlayer{
         ) {
 
             Row (Modifier.fillMaxWidth().padding(top=16.dp), horizontalArrangement = Arrangement.End){
-                SettingsMixer()
+                OpenMixer()
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -163,11 +163,13 @@ class MyPlayer{
                     checked = isPlaying.value,
                     onCheckedChange = {
                         isPlaying.value = it
+                        //TODO ---------------------------c'est ici qu'il faudra agir pour activer le player
                         if (isPlaying.value) {
                             player.play()
                         } else {
                             player.pause()
                         }
+
                     },
                     colors = IconButtonDefaults.filledTonalIconToggleButtonColors(if (isPlaying.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary),
                     modifier = Modifier.size(80.dp),
@@ -197,7 +199,8 @@ class MyPlayer{
                 })
             }
 
-
+            //TODO ne pas supprimer car il s'agit de la barre de temps du player (minutes:secondes)
+            /*
             TrackSliderPlayer(
                 value = sliderPosition.longValue.toFloat(),
                 onValueChange = {
@@ -211,6 +214,7 @@ class MyPlayer{
                 currentPosition,
                 totalDuration,
             )
+             */
         }
     }
 
