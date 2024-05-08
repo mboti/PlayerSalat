@@ -1,4 +1,4 @@
-package com.mboti.playersalat.commun
+package com.mboti.playersalat.tool
 
 
 /***

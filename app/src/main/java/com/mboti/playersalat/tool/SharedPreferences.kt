@@ -1,8 +1,8 @@
-package com.mboti.playersalat.preferences
+package com.mboti.playersalat.tool
 
 import android.content.Context
 
-class MySharedPreferences (context: Context) {
+class SharedPreferences (context: Context) {
 
     val sharedSoundElFatiha = "sharedSoundElFatiha"
     val sharedSoundAyat = "sharedSoundAyat"

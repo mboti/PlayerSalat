@@ -47,7 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.PlaybackParameters
-import com.mboti.playersalat.preferences.MySharedPreferences
+import com.mboti.playersalat.tool.SharedPreferences
 import com.mboti.playersalat.R
 import com.mboti.playersalat.player
 import kotlin.math.roundToInt
@@ -122,7 +122,7 @@ fun BottomSheetMixer(
         ) {
 
             // Récupérer les valeurs des SharedPréférences
-            val myPref = MySharedPreferences(LocalContext.current)
+            val myPref = SharedPreferences(LocalContext.current)
             val valElFatiha = myPref.getSoundElFatiha(myPref.sharedSoundElFatiha, 60)
             val valAyat = myPref.getSoundAyat(myPref.sharedSoundAyat, 90)
             val valOthers = myPref.getSoundOther(myPref.sharedSoundOther, 10)
@@ -161,7 +161,7 @@ fun BottomSheetMixer(
 
 
 @Composable
-fun SwitchCountdown(valCountdown: Boolean, myPref: MySharedPreferences) {
+fun SwitchCountdown(valCountdown: Boolean, myPref: SharedPreferences) {
     val switchCountdownState = remember { mutableStateOf(valCountdown) }
 
     Row(
@@ -186,7 +186,7 @@ fun SwitchCountdown(valCountdown: Boolean, myPref: MySharedPreferences) {
 
 
 @Composable
-fun VerticalSliderSound(titleArabic:String, title:String, sliderValue:Int, myPref:MySharedPreferences){
+fun VerticalSliderSound(titleArabic:String, title:String, sliderValue:Int, myPref: SharedPreferences){
 
     var sliderProgressValue by rememberSaveable { mutableIntStateOf(sliderValue) }
     Box {
@@ -270,7 +270,7 @@ fun VerticalSliderSound(progressValue: Int? = null, value: (Int) -> Unit) {
 
 
 @Composable
-fun SliderSpeed(valSpeed: Float, myPref: MySharedPreferences) {
+fun SliderSpeed(valSpeed: Float, myPref: SharedPreferences) {
     var sliderSpeedPosition by remember { mutableFloatStateOf(valSpeed) }
     Row(
         Modifier

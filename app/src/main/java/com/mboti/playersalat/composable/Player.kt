@@ -33,7 +33,7 @@ import androidx.media3.common.MediaItem
 import com.mboti.playersalat.R
 import com.mboti.playersalat.model.Music
 import com.mboti.playersalat.player
-import com.mboti.playersalat.preferences.MySharedPreferences
+import com.mboti.playersalat.tool.SharedPreferences
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -60,7 +60,7 @@ class Player{
     fun InitPlayer(myList: List<Music>) {
 
         val playingSongIndex = remember { mutableIntStateOf(0) }
-        val myPref = MySharedPreferences(LocalContext.current)
+        val myPref = SharedPreferences(LocalContext.current)
 
         // currentMediaItemIndex : Returns the index of the current MediaItem in the timeline,
         // or the prospective index if the current timeline is empty.
