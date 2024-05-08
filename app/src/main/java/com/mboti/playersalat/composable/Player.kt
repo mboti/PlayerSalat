@@ -17,34 +17,27 @@ import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableLongState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
-import com.mboti.playersalat.commun.convertToText
 import com.mboti.playersalat.R
 import com.mboti.playersalat.model.Music
 import com.mboti.playersalat.player
+import com.mboti.playersalat.preferences.MySharedPreferences
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 /*--------------------------------------------------------
@@ -63,23 +56,33 @@ TODO Ajouter dans le manifeste.xml les deux lignes afin de
 
 class Player{
 
-    init {
-    }
     @Composable
     fun InitPlayer(myList: List<Music>) {
 
         val playingSongIndex = remember { mutableIntStateOf(0) }
-        val coroutineScopeManagePlayAndPause = rememberCoroutineScope()
+        val myPref = MySharedPreferences(LocalContext.current)
 
         // currentMediaItemIndex : Returns the index of the current MediaItem in the timeline,
         // or the prospective index if the current timeline is empty.
         LaunchedEffect(player.currentMediaItemIndex) {
+
             playingSongIndex.intValue = player.currentMediaItemIndex
+
+            Log.i("Mounir", "------------------ ${playingSongIndex.intValue}")
+
+
+//            val sound = when (titleArabic) {
+//                strElFatiha -> myPref.getSoundElFatiha(myPref.sharedSoundElFatiha, 60)
+//                strAyat -> myPref.getSoundAyat(myPref.sharedSoundElFatiha, 90)
+//                else -> myPref.getSoundOther(myPref.sharedSoundElFatiha, 10)
+//            }
+            val sound = myPref.getSoundElFatiha(myPref.sharedSoundElFatiha, 60)
+            player.volume = (sound / divided)
         }
 
         val context = LocalContext.current
         LaunchedEffect(Unit) {
-           myList.forEach {
+            myList.forEach {
                 val path = "android.resource://" + context.packageName + "/" + it.audioSelected
                 val mediaItem = MediaItem.fromUri(Uri.parse(path))
                 player.addMediaItem(mediaItem)
@@ -133,13 +136,17 @@ class Player{
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
+                // on peut mettre cette ligne n'import où
                 InitCountdown() // dépend de 'showDialog'
 
+                /*******************************************
+                 *                   STOP
+                 *******************************************/
                 Button(
                     onClick = {
                         isPlaying.value = false
-                        player.setPlayWhenReady(false);
-                        player.stop();
+                        player.setPlayWhenReady(false)
+                        player.stop()
                         player.seekTo(0)
                         player.seekToDefaultPosition(0)
                         isReactiveCountdown.value = true
@@ -159,42 +166,69 @@ class Player{
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                ButtonControl(icon = R.drawable.ic_previous, size = 20.dp, onClick = {
-                    player.seekToPreviousMediaItem()
-                })
+
+                /*******************************************
+                 *                   PREVIOUS
+                 *******************************************/
+                Button(
+                    onClick = { player.seekToPreviousMediaItem() },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary,),
+                    enabled = !isReactiveCountdown.value
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_previous),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.width(10.dp))
 
 
+                /*******************************************
+                 *                   PLAY
+                 *******************************************/
                 FilledTonalIconToggleButton(
                     checked = isPlaying.value,
                     onCheckedChange = {
                         isPlaying.value = it
 
-                        /*
-                        if (isPlaying.value) {
-                            player.play()
-                        } else {
-                            player.pause()
-                        }
-                         */
 
-                        coroutineScopeManagePlayAndPause.launch {
-                            if(isReactiveCountdown.value)
-                                showDialog.value = true
+                        runBlocking {
+                            coroutineScope{
+                                val valSwitchCountdown = myPref.getCountdown(myPref.sharedSoundCountdown, false)
+                                if(valSwitchCountdown){
+                                    Log.i("Mounir", "   Mounir  -  ${myPref.sharedSoundCountdown}")
+                                    launch {
+                                        if(isReactiveCountdown.value)
+                                            showDialog.value = true
 
-                            if (isPlaying.value) {
-                                player.play()
-//                                if(isReactiveCountdown.value){
-//                                    delay(3300)
-//                                    player.play()
-//                                }
-                                isReactiveCountdown.value = false
-                            }else{
-                                player.pause()
+                                        if (isPlaying.value) {
+                                            player.play()
+                                            isReactiveCountdown.value = false
+                                        }else{
+                                            player.pause()
+                                        }
+                                    }
+                                }
+                                else{
+                                    launch {
+                                        if (isPlaying.value) {
+                                            if(isReactiveCountdown.value){
+                                                player.seekToNextMediaItem() //ne le faire qu'une seul fois d'où la condition
+                                            }
+                                            player.play()
+                                            isReactiveCountdown.value = false
+                                        }else{
+                                            player.pause()
+                                        }
+                                    }
+                                }
                             }
                         }
                     },
+
                     colors = IconButtonDefaults.filledTonalIconToggleButtonColors(if (isPlaying.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary),
                     modifier = Modifier.size(80.dp),
                 )
@@ -221,12 +255,30 @@ class Player{
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                ButtonControl(icon = R.drawable.ic_next, size = 20.dp, onClick = {
-                    player.seekToNextMediaItem()
-                })
+//                ButtonControl(icon = R.drawable.ic_next, size = 20.dp, onClick = {
+//                    player.seekToNextMediaItem()
+//                })
+
+                /*******************************************
+                 *                   NEXT
+                 *******************************************/
+                Button(
+                    onClick = { player.seekToNextMediaItem() },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary,),
+                    enabled = !isReactiveCountdown.value
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_next),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
 
             //TODO ne pas supprimer car il s'agit de la barre de temps du player (minutes:secondes)
+            /*******************************************
+             *               SLIDER PLAYER
+             *******************************************/
             /*
             TrackSliderPlayer(
                 value = sliderPosition.longValue.toFloat(),
@@ -246,73 +298,78 @@ class Player{
     }
 
 
-    @Composable
-    fun ButtonControl(icon: Int, size: Dp, onClick: () -> Unit) {
-        Button(
-            onClick = {
-                onClick()
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary,
-                //contentColor = Color.White
-            )
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = icon),
-                contentDescription = null,
-                modifier = Modifier.size(size)
-            )
-        }
-    }
+//    @Composable
+//    fun ButtonControl(icon: Int, size: Dp, onClick: () -> Unit) {
+//        Button(
+//            onClick = {
+//                onClick()
+//            },
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = MaterialTheme.colorScheme.secondary,
+//                //contentColor = Color.White
+//            )
+//        ) {
+//            Icon(
+//                imageVector = ImageVector.vectorResource(id = icon),
+//                contentDescription = null,
+//                modifier = Modifier.size(size)
+//            )
+//        }
+//    }
 
 
-    /**
-     * Tracks and visualizes the song playing actions.
-     */
-    @Composable
-    fun TrackSliderPlayer(
-        value: Float,
-        onValueChange: (newValue: Float) -> Unit,
-        onValueChangeFinished: () -> Unit,
-        songDuration: Float,
-        currentPosition: MutableLongState,
-        totalDuration: MutableLongState
-    ) {
-        Slider(
-            value = value,
-            onValueChange = { onValueChange(it) },
-            onValueChangeFinished = { onValueChangeFinished() },
-            valueRange = 0f..songDuration,
-            colors = SliderDefaults.colors(
-                thumbColor = Color.Black,
-                activeTrackColor = Color.DarkGray,
-                inactiveTrackColor = Color.Gray,
-            )
-        )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
 
-            Text(
-                text = (currentPosition.longValue).convertToText(),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(8.dp),
-                color = Color.Black,
-                style = TextStyle(fontWeight = FontWeight.Bold)
-            )
+    /**    NE PAS SUPPRIMER   **/
+//    /**
+//     * Tracks and visualizes the song playing actions.
+//     */
+//    @Composable
+//    fun TrackSliderPlayer(
+//        value: Float,
+//        onValueChange: (newValue: Float) -> Unit,
+//        onValueChangeFinished: () -> Unit,
+//        songDuration: Float,
+//        currentPosition: MutableLongState,
+//        totalDuration: MutableLongState
+//    ) {
+//        Slider(
+//            value = value,
+//            onValueChange = { onValueChange(it) },
+//            onValueChangeFinished = { onValueChangeFinished() },
+//            valueRange = 0f..songDuration,
+//            colors = SliderDefaults.colors(
+//                thumbColor = Color.Black,
+//                activeTrackColor = Color.DarkGray,
+//                inactiveTrackColor = Color.Gray,
+//            )
+//        )
+//
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//        ) {
+//
+//            Text(
+//                text = (currentPosition.longValue).convertToText(),
+//                modifier = Modifier
+//                    .weight(1f)
+//                    .padding(8.dp),
+//                color = Color.Black,
+//                style = TextStyle(fontWeight = FontWeight.Bold)
+//            )
+//
+//            val remainTime = totalDuration.longValue - currentPosition.longValue
+//            Text(
+//                text = if (remainTime >= 0) remainTime.convertToText() else "",
+//                modifier = Modifier
+//                    .padding(8.dp),
+//                color = Color.Black,
+//                style = TextStyle(fontWeight = FontWeight.Bold)
+//            )
+//        }
+//    }
 
-            val remainTime = totalDuration.longValue - currentPosition.longValue
-            Text(
-                text = if (remainTime >= 0) remainTime.convertToText() else "",
-                modifier = Modifier
-                    .padding(8.dp),
-                color = Color.Black,
-                style = TextStyle(fontWeight = FontWeight.Bold)
-            )
-        }
-    }
+
 
 
     @Composable

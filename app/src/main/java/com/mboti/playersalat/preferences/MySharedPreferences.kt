@@ -8,7 +8,6 @@ class MySharedPreferences (context: Context) {
     val sharedSoundAyat = "sharedSoundAyat"
     val sharedSoundOther = "sharedSoundOther"
     val sharedSoundCountdown = "sharedSoundCountdown"
-    val sharedSoundBeeps = "sharedSoundBeeps"
     val sharedSoundSpeed = "sharedSoundSpeed"
 
     private val sharedPreferences = context.getSharedPreferences("my_preferences", Context.MODE_PRIVATE)
@@ -35,12 +34,6 @@ class MySharedPreferences (context: Context) {
     // Countdown (on/off)
     fun saveCountdown(key: String, value: Boolean) { sharedPreferences.edit().putBoolean(key, value).apply() }
     fun getCountdown(key: String, defaultValue: Boolean): Boolean { return sharedPreferences.getBoolean(key, defaultValue) }
-
-
-
-    // Beeps (on/off)
-    fun saveBeeps(key: String, value: Boolean) { sharedPreferences.edit().putBoolean(key, value).apply() }
-    fun getBeeps(key: String, defaultValue: Boolean): Boolean { return sharedPreferences.getBoolean(key, defaultValue) }
 
 
 

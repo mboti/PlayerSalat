@@ -1,5 +1,6 @@
 package com.mboti.playersalat.composable
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -55,6 +56,8 @@ import kotlin.math.roundToInt
 const val strElFatiha = "ٱلْفَاتِحَةِ"
 const val strAyat = "آيات"
 const val strOther = "آحرون"
+const val steps = 100 // Number of steps in the SeekBar
+const val divided = steps.toFloat()
 
 
 @Composable
@@ -124,7 +127,6 @@ fun BottomSheetMixer(
             val valAyat = myPref.getSoundAyat(myPref.sharedSoundAyat, 90)
             val valOthers = myPref.getSoundOther(myPref.sharedSoundOther, 10)
             val valCountdown = myPref.getCountdown(myPref.sharedSoundCountdown, true)
-            val valBeeps = myPref.getBeeps(myPref.sharedSoundBeeps, false)
             val valSpeed = myPref.getSpeed(myPref.sharedSoundSpeed, 1.0F)
 
 
@@ -146,7 +148,6 @@ fun BottomSheetMixer(
                 Spacer(modifier = Modifier.height(20.dp))
                 SwitchCountdown(valCountdown, myPref)
                 Spacer(modifier = Modifier.height(16.dp))
-                SwitchBeep(valBeeps, myPref)
                 //Spacer(modifier = Modifier.height(2.dp))
                 SliderSpeed(valSpeed, myPref)
             }
@@ -176,39 +177,16 @@ fun SwitchCountdown(valCountdown: Boolean, myPref: MySharedPreferences) {
             onCheckedChange = { isChecked ->
                 switchCountdownState.value = isChecked
                 myPref.saveCountdown(myPref.sharedSoundCountdown, isChecked)
+                Log.i("Mounir", "   ${switchCountdownState.value}  -  ${myPref.sharedSoundCountdown}")
             }
         )
     }
 }
 
 
-@Composable
-fun SwitchBeep(valBeeps: Boolean, myPref: MySharedPreferences) {
-    val switchBeepState = remember { mutableStateOf(valBeeps) }
-
-    Row(
-        Modifier
-            .fillMaxWidth()
-        /*.padding(start = 20.dp, end = 20.dp)*/,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween)
-    {
-        Text(text = "Beeps")
-        Switch(
-            checked = switchBeepState.value,
-            onCheckedChange = { isChecked ->
-                switchBeepState.value = isChecked
-                myPref.saveBeeps(myPref.sharedSoundBeeps, isChecked)
-            }
-        )
-    }
-}
 
 @Composable
 fun VerticalSliderSound(titleArabic:String, title:String, sliderValue:Int, myPref:MySharedPreferences){
-
-    val steps = 100 // Number of steps in the SeekBar
-    val divided = steps.toFloat()
 
     var sliderProgressValue by rememberSaveable { mutableIntStateOf(sliderValue) }
     Box {

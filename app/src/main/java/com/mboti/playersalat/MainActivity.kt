@@ -14,7 +14,6 @@ import com.mboti.playersalat.model.playList
 import com.mboti.playersalat.ui.theme.PlayerSalatTheme
 
 
-
 lateinit var player: ExoPlayer
 
 class MainActivity : ComponentActivity() {
@@ -36,6 +35,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-
 

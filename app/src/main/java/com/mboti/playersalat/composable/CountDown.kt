@@ -1,6 +1,7 @@
 package com.mboti.playersalat.composable
 
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -86,14 +87,27 @@ fun DialogCountdown(setShowDialog: (Boolean) -> Unit, setValue: (String) -> Unit
                 var isTimerRunning by remember { mutableStateOf(true) }
 
 
+//                // Pour le Beep sonore
+//                var mediaPlayerBeep by remember { mutableStateOf<MediaPlayer?>(null) }
+//                val context = LocalContext.current
+
+
+
                 /**
                  * Si la minuterie est en cours d'exécution ( isTimerRunning) et qu'il reste du temps ( currentTime> 0),
                  * elle décrémente currentTimetoutes les 100 millisecondes et met à jour en valueconséquence
                  * (en divisant par totalTimepour obtenir une progression de 0 à 1). Cela permet de suivre efficacement
                  * la progression du chronomètre
                  */
-                //LaunchedEffectobserve des changements dans currentTimeet isTimerRunning
+                //LaunchedEffectobserve des changements dans currentTime et isTimerRunning
                 LaunchedEffect(key1 = currentTime, key2 = isTimerRunning) {
+
+//                    // lancemeent du Beep sonore
+//                    if(currentTime == 3000L){
+//                        mediaPlayerBeep = MediaPlayer.create(context, R.raw.beep)
+//                        mediaPlayerBeep?.start()
+//                    }
+
                     if (currentTime > 0 && isTimerRunning) {
                         delay( 100L )
                         currentTime -= 100L
@@ -103,6 +117,7 @@ fun DialogCountdown(setShowDialog: (Boolean) -> Unit, setValue: (String) -> Unit
                             isCountdownFinish.value = true
                             setShowDialog(false)
                             setValue("PLAY")
+                            Log.i("Mounir", "setValue(\"PLAY\") $isCountdownFinish")
                         }
                     }
                 }
